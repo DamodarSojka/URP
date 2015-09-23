@@ -1,0 +1,25 @@
+{% set  NETWORK_NAME = "a-new-network" %}
+{% set  ZONE_CONST = "zone1const" %}
+{% set  ZONE_CONST = "zone2const" %}
+{% set  TEST_SCOPE = "fromParent" %}
+
+resources:
+- name: the-first-vm
+  type: vm-template.jinja
+  properties:
+    machineType: f1-micro
+    zone: {{ZONE_CONST}}
+    network: {{ NETWORK_NAME }}
+    look: hello!
+- name: the-second-vm
+  type: vm-template.jinja
+  properties:
+    machineType: g1-small
+    zone: us-central1-f
+    network: {{ NETWORK_NAME }}
+- name: {{ NETWORK_NAME }}
+  type: network-template.jinja
+- name: {{ NETWORK_NAME }}-firewall
+  type: firewall-template.jinja
+  properties:
+    network: {{ NETWORK_NAME }}

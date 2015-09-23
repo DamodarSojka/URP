@@ -1,0 +1,33 @@
+google's
+  templates // old
+    non unique names are rising an error (but errors are not helping to find invalid templates)
+    when expanded or seen as layout properties are ordered alphabetically 
+    when property is declared twice (in same scope?) with same value no error is rised 
+    when property is declared twice (in same scope?) with DIFF value no error is rised and the latest value is chosen 
+      zone: zone-1
+      zone: zone-2
+      zone-2 will be chosen 
+    when property is HARDCODED in template and parent redeclares it hardcoded one will be chosen (layout will show value from parent,
+      expanded will show hardcoded value), no error is raised
+      so if some of the values depend on value from parent like 
+        machineType: https://www.googleapis.com/compute/v1/projects/{{ env["project"] }}/zones/{{ properties["zone"] }}/machineTypes/{{ properties["machineType"] }}
+      then it will use property from parent but the other one (hardcoded) will stay different
+    some properties are required and even when are provided by parent but not declared by template error is raised
+
+
+
+  templates
+    parent is only declaring properties that CAN BE (but might not be!) used by child by referencing object properties {{properties[
+      nameOfProperty]}}
+    when expanded or seen as layout properties are ordered alphabetically
+    when property or jijnja2 variable is declared twice (in same scope?) with same value no error is rised 
+    when property or jijnja2 variable is declared twice (in same scope?) with DIFF value no error is rised and the latest value is chosen 
+      zone: zone-1
+      zone: zone-2
+      zone-2 will be chosen 
+    if some of properties from parent are not used no error is rised
+    it is possible to declare some non-existing property (non-existing in the sense that look:hello! probably is not meaningful for GAP) 
+      (both directly on template and by referencing properties)
+    jinja2 variables are scoped to file so
+      variable from parent is NOT usable by child directly (no error rised! value will be null!)
+      but of course child may use properties[] to access that variable (if property using that variable was declared on parent)

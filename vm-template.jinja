@@ -1,0 +1,23 @@
+{% set  ZONE_CONST = "zone3constLEL" %}
+
+resources:
+- name: {{ env["name"] }}
+  type: compute.v1.instance
+  properties:
+    disks:
+    - autoDelete: true
+      type: PERSISTENT
+      boot: true
+      deviceName: boot
+      initializeParams:
+        sourceImage:  https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20150526
+    machineType: https://www.googleapis.com/compute/v1/projects/{{ env["project"] }}/zones/{{ properties["zone"] }}/machineTypes/{{ properties["machineType"] }}
+    networkInterfaces:
+    - network: $(ref.{{ properties["network"] }}.selfLink)
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    zone: {{properties['zone']}}
+    look: {{properties['look']}}
+    checkScoping: {{ZONE_CONST}}
+    testScope:{{TEST_SCOPE}}
