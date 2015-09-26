@@ -3,11 +3,13 @@ imports:
 - path: network-template.jinja
 - path: firewall-template.jinja
 - path: compute-engine-template.jinja
+- path: additional-template.jinja
+- path: a-test-network.jinja
 
 resources:
 - name: compute-engine-setup
   type: compute-engine-template.jinja
-- name: try-something
+- name: something-really
   type: compute.v1.instance
   properties:
     disks:
@@ -24,3 +26,10 @@ resources:
       - name: External NAT
         type: ONE_TO_ONE_NAT
     zone: zone-lel
+    testRef: $(ref.the-first-vm.zone)
+- name: lemaoTry
+  type: a-test-network.jinja
+  properties:
+    IPv4Range: rangelel
+
+

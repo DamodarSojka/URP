@@ -10,7 +10,6 @@ resources:
     machineType: f1-micro
     zone: {{ZONE_CONST}}
     network: {{ NETWORK_NAME }}
-    look: hello!
 - name: the-second-vm
   type: vm-template.jinja
   properties:
@@ -23,3 +22,9 @@ resources:
   type: firewall-template.jinja
   properties:
     network: {{ NETWORK_NAME }}
+- name: additional-thing-13377777
+  type: additional-template.jinja
+  properties:
+    dupa: dupaLol
+    nieokryta: nieokryta
+    nieokryta2: nieokryta2
