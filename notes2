@@ -1,0 +1,115 @@
+x problem in google's (short)
+	- description (detailed)
+	- why is this a problem?
+	- L3 approach (how can problem be solved)
+	- if something would be added to L3 how would it change the behavior
+
+	--- not applicable
+	--=-- same as above
+
+1 unused properties 
+	- parent template might decalre property that none of it's child will use
+	- dead code is always a problem, also misspelled properties in the child template won't rise an error
+	- both composition and specialisation would use all properties of both templates
+	- if notion of schema would be added to L3 misspelled properties would be detected (!1!)
+2 alphabetically ordered properties
+	- when deployment manager processes properties it orders them alphabetically which causes 'type' property to be lower than 'properties'
+	- not really a bug but annoying when viewing preview, makes it harder to read
+	- ---
+	- ---
+3 redeclaration of properties
+	- properties might be redeclared without rising an error, last property will used
+	(...)
+	zone: zone-1
+    zone: zone-2
+    (...)
+    zone will evaluate to zone-2
+    - when working on a large file or working in a team it is possible to override someone's else important value, or even own value
+    - names of properties must be unique in L3 so error is rised
+    - ---
+4 declaration of non-existing properties
+	- it is possible to declare and assign a value to non-existing property like 
+	(...)
+	hello: world 
+	(...)
+	is probably unmeaningful for the configured system
+	- user might think that value is used when in fact it is not (for example admin might be used to working with systems with 'zone' property but current system might use 'deployment-zone' instead), which might lead to unpredictable behavior, also typos are not checked
+	- currently L3 is not solving this problem 
+	- same as (!1!)
+5 properties passed only to direct child
+	- properties object from parent is visible only to direct child, child has to declare property again to pass them to it's child
+	- this is not an obvious behavior vulnerable to typos, also when creating complex inheritance trees lot of additional code is required, it is also possible to pass the property with different name, what might make debugging harder 
+	- when using composition/specialisation in L3 all properties are used at every stage, so user can be sure that when creating complex compositions final object will have all properties (but values of course might be different)
+	- ---
+6 referencing non-existing jinja2 variables
+	- when accessing non-existing jinj2 variable (which are scoped to the file in which they are created) no error is raised, and value is null
+	- error should be raised, simple misspelling might lead to unpredictable behavior
+	- HERE IAM NOT QUITE SURE HOW REFERENCES ARE WORKING IN L3
+	- but I know referencing non-existing property should raise an error
+7 referencing non-existing parent property
+	- referencing non-existing parent property is not raising an error and value is:
+	when referencing property that does not exists {{properties['notexistingone']}} value is null
+	when referencing parent by properties that
+        is a jinja2 variable but is not defined in parent scope
+        or is null
+        or is None
+        then value is always None
+    - referencing non-existing parent property should rise an error, such attempt may be because name was misspelled or may indicate some more serious mistakes, for example using different templated as parent than initially intended
+    - this problem is not present in L3, because parent-child relation is controlled by composition/specialistaion which copies all values
+    - ---
+8 no difference beetwen assigned value null/None and value that evaluated to null/None
+	- --=--
+	- not sure what problems this might cause
+	- same behavior present in L3
+	- probably type system
+9 $(ref.name.property) are not resolved in --preview
+	- referenced properties (from arbitrary type) are not resolved in --preview, some of them can't be resolved before proper deployment like selfLink property but it is not the case when referencing properties with values specified by user
+	- it should be possible to see what all the values are resolving to (at least other than selfLink), at least it is impossible to reference unexisting property
+	- L3 is currently not providing any solution to 'selfLink' like problems
+	- I don't have currently any idea how to solve that
+10 import unused templates
+	- importing templates that are not used is not rising any error
+	- dead code is never a good option
+	- L3 isn't checking if any of its resources are used
+	- I don't have currently any idea how to solve that
+11 when using template and adding property in configuration file, the property won't be used
+	- --=--
+	- this behavior is not documented, an error should be rised when both template and properties are used at same time in configuration file
+	- in L3 there is no different between configuration file and templates, so problem is not present
+	- ---
+
+
+
+UPDATES after 03/10/2015
+12 if property object is not declared on parent and child tries to reference it ERROR is raised (although not really helpfull error)
+	also just declaring properties object is enough (without giving it any values)
+
+13 when declaring template and giving it a name, that name is scoped to whole configuration so:
+	$(ref.a-new-network.selfLink)
+	$(ref.{{ properties["network"] }}.selfLink) (providing that parent given 'a-new-network' in this property)
+	will evaluate to same thing anywhere
+
+14 if child has name filed defined then this name is used, to use parent name it has to use {{ env["name"] }}, so parent can't force child to has a specific name without 'preparing' its code
+
+15 it is possible to create objects different than properites and sucesfully pass values to child from that object
+	whatever:
+		zone: some-zone
+
+16 not possible to create unmeaningful field on direct template (with final type - compute.v1.firewall)
+	This is ok:
+	resources:
+	- name: {{name}}
+	  type: compute.v1.firewall
+	  properties:
+	    network: $(ref.a-new-network.selfLink)
+	    sourceRanges: ["0.0.0.0/0"]
+	    arbuz: hey                         <--
+
+	This fails
+	resources:
+	- name: {{name}}
+	  arbuz: hey                 <--
+	  type: compute.v1.firewall
+	  properties:
+	    network: $(ref.a-new-network.selfLink)
+	    sourceRanges: ["0.0.0.0/0"]

@@ -1,35 +1,12 @@
 imports:
-- path: vm-template.jinja
 - path: network-template.jinja
-- path: firewall-template.jinja
 - path: compute-engine-template.jinja
 - path: additional-template.jinja
-- path: a-test-network.jinja
+- path: firewall-template.jinja
 
 resources:
 - name: compute-engine-setup
   type: compute-engine-template.jinja
-- name: something-really
-  type: compute.v1.instance
   properties:
-    disks:
-    - autoDelete: true
-      type: PERSISTENT
-      boot: true
-      deviceName: boot
-      initializeParams:
-        sourceImage:  https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20150526
-    machineType: https://www.googleapis.com/compute/v1/projects/intense-hour-107221/zones/zone-lel/machineTypes/type-lel
-    networkInterfaces:
-    - network: $(ref.a-new-network.selfLink)
-      accessConfigs:
-      - name: External NAT
-        type: ONE_TO_ONE_NAT
-    zone: zone-lel
-    testRef: $(ref.the-first-vm.zone)
-- name: lemaoTry
-  type: a-test-network.jinja
-  properties:
-    IPv4Range: rangelel
-
-
+    katamaran: katatatatatConf
+    fuj: fujkiConf

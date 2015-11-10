@@ -1,0 +1,77 @@
+
+projectName: {{env["project"]}}
+networkName: "a-new-network"
+
+
+network-template: {
+	name: network-name --default
+	type: compute.v1.network --final
+	properties: {
+		IPv4Range: 10.0.0.1/16
+	}
+}
+
+firewall-template: {
+	name: firewall-name --default
+	type: compute.v1.firewall --final
+	properties: {
+		network: $(ref.{{ properties["network"] }}.selfLink) ---how to express late evaluation? and how to reference this network ?
+		sourceRanges: ["0.0.0.0/0"]
+		allowed: {
+			IPProtocol: TCP
+      		ports: ["80"]
+		}
+	}
+}
+
+vm-template: {
+	name: vm-name --default
+	type: compute.v1.instance --final
+	properties: {
+		disks: {
+			autoDelete: true
+			type: PERSISTENT
+		    boot: true
+		    deviceName: boot
+		    initializeParams: {
+		    	sourceImage:  https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20150526
+		    }
+		}
+		machineType: default-machine-type --default
+		networkInterfaces:
+	    - network: $(ref.{{ properties["network"] }}.selfLink) ---how to express late evaluation? and how to reference this network ?
+	      accessConfigs:
+	      - name: External NAT
+	        type: ONE_TO_ONE_NAT
+	    zone: default-zone --default
+	}
+}
+
+
+the-first-vm: ^vm-template +> {
+	name: the-first-vm
+  	properties:
+    	machineType: https://www.googleapis.com/compute/v1/projects/$projectName/zones/^zone/machineTypes/f1-micro
+    	zone: us-central1-f
+    	network: $networkName
+}
+
+the-second-vm: {
+	name: the-second-vm
+  	properties:
+    	machineType: https://www.googleapis.com/compute/v1/projects/$projectName/zones/^zone/machineTypes/g1-small
+    	zone: us-central1-f
+    	network: $networkName
+}
+
+networkName <-- how to use 'variable' as name here? I don't want to reassign it networkName: {..}
+a-new-network: ^network-template + {
+	name: a-new-network
+}
+
+a-new-network-firewall: ^firewall-template + {
+	name: a-new-network-firewall
+	properties: {
+		network: $networkName
+	}
+}
